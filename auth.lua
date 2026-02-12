@@ -143,9 +143,8 @@ while not isAuthenticated do
 end
 
 --// INITIALISATION //--
-local Window = Library:CreateWindow({
-    Name = "OYNX HUB"
-})
+local authWindow = Library:CreateWindow({ Name = "OYNX HUB - Auth" })
+local authTab = authWindow:CreateTab("Key")
 
 --// SYSTÈME DE BLOCAGE DE FONCTIONNALITÉS //--
 local function IsFeatureAllowed(name)
