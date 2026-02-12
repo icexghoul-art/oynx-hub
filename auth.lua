@@ -119,17 +119,14 @@ authTab:CreateButton({ Name = "Valider la clé", Callback = function()
         local ok, info = ValidateKeyRemote(enteredKey)
         if ok then
             isAuthenticated = true
-            Library:Notify("Auth", "Clé validée via serveur", 3)
             pcall(function() if authWindow and authWindow.Close then authWindow:Close() end end)
         else
-            local msg = (type(info) == "table" and info.message) or tostring(info)
-            Library:Notify("Auth", "Clé refusée: " .. tostring(msg), 3)
+            Library:Notify("Auth", "Clé refusée: " .. tostring(info), 3)
         end
     else
         -- mode hors-ligne: accepte simplement la saisie non-vide
         if enteredKey and enteredKey ~= "" then
             isAuthenticated = true
-            Library:Notify("Auth", "Clé locale acceptée", 3)
             pcall(function() if authWindow and authWindow.Close then authWindow:Close() end end)
         else
             Library:Notify("Auth", "Entrer une clé valide", 3)
