@@ -216,20 +216,19 @@ end
 --// NOTIFICATION DE BIENVENUE //--
 Library:Notify("Système", "Bienvenue ! Appuie sur K pour cacher l'UI.", 5)
     
-    return {
-        Library = Library,
-        Window = nil,
-        Players = Players,
-        player = player,
-        Mouse = Mouse,
-        Camera = Camera,
-        RunService = RunService,
-        UserInputService = UserInputService,
-        Debris = Debris,
-        ReplicatedStorage = ReplicatedStorage,
-        VirtualInputManager = VirtualInputManager,
-        HttpService = HttpService,
-        RegisterHit = RegisterHit,
-        RegisterAttack = RegisterAttack
-    }
-end
+return {
+    Library = Library,
+    Window = authWindow,
+    Players = Players,
+    player = player,
+    Mouse = Mouse,
+    Camera = Camera,
+    RunService = RunService,
+    UserInputService = UserInputService,
+    Debris = Debris,
+    ReplicatedStorage = ReplicatedStorage,
+    VirtualInputManager = VirtualInputManager,
+    HttpService = HttpService,
+    RegisterHit = RegisterHit,
+    RegisterAttack = RegisterAttack
+}
