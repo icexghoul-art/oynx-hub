@@ -1,4 +1,4 @@
-return function(FarmTab, player, RunService, ReplicatedStorage, Library)
+return function(FarmTab, player, RunService, ReplicatedStorage, Library, CombatModule)
     -- ==================================================================================================== AUTO FARM ====================================================================================================
 
 -- ==================================================================================================== 
@@ -359,10 +359,14 @@ FarmTab:CreateToggle({
         Farm.Enabled = Value
         
         if Value then
-            toggleFastAttack(true)
+            if CombatModule and CombatModule.ToggleFastAttack then
+                CombatModule.ToggleFastAttack(true)
+            end
             Library:Notify("Auto Farm", "Démarré en mode: " .. Farm.Mode, 3)
         else
-            toggleFastAttack(false)
+            if CombatModule and CombatModule.ToggleFastAttack then
+                CombatModule.ToggleFastAttack(false)
+            end
             Library:Notify("Auto Farm", "Arrêté", 2)
         end
     end,
