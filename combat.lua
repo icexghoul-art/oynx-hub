@@ -787,6 +787,8 @@ CombatTab:CreateSlider({
     
     FastAttackEnabled = FastAttackEnabled,
     FastAttackIntensity = FastAttackIntensity,
-    FastAttackRange = FastAttackRange
+    FastAttackRange = FastAttackRange,
+    
+    ToggleFastAttack = toggleFastAttack  -- ✅ AJOUTEZ CETTE LIGNE
 }
 end
