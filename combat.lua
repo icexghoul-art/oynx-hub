@@ -1,4 +1,25 @@
 return function(CombatTab, player, Camera, Mouse, RunService, UserInputService, VirtualInputManager, ReplicatedStorage)
+
+local Library = loadstring(game:HttpGet("https://pastebin.com/raw/YHaPCpCr"))()
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local Mouse = player:GetMouse()
+local Camera = workspace.CurrentCamera
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local Debris = game:GetService("Debris")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local HttpService = game:GetService("HttpService")
+
+-- Variables Fast Attack (Boosted)
+local Net = ReplicatedStorage:WaitForChild("Modules"):WaitForChild("Net")
+local RegisterHit = Net:WaitForChild("RE/RegisterHit")
+local RegisterAttack = Net:WaitForChild("RE/RegisterAttack")
+local Modules = ReplicatedStorage:FindFirstChild("Modules")
+local Net = Modules and Modules:FindFirstChild("Net")
+local RegisterHit = Net and Net:FindFirstChild("RE/RegisterHit")
+local RegisterAttack = Net and Net:FindFirstChild("RE/RegisterAttack")
 -- TriggerBot Variables
 local TriggerBotEnabled = false
 local TriggerBotDistance = 150
