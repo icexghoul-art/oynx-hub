@@ -349,10 +349,8 @@ end
 -- ONGLET AUTO FARM GUI
 -- ====================================================================================================
 
-local FarmTab = Window:CreateTab("Auto Farm", "rbxassetid://6034509925")
-
 FarmTab:CreateSection({Name = "Auto Farm Settings", Column = "Left"})
-
+    
 FarmTab:CreateToggle({
     Name = "Enable Auto Farm",
     Column = "Left",
