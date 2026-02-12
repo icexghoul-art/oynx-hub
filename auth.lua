@@ -119,14 +119,17 @@ authTab:CreateButton({ Name = "Valider la clé", Callback = function()
         local ok, info = ValidateKeyRemote(enteredKey)
         if ok then
             isAuthenticated = true
+            Library:Notify("Auth", "Clé validée via serveur", 3)
             pcall(function() if authWindow and authWindow.Close then authWindow:Close() end end)
         else
-            Library:Notify("Auth", "Clé refusée: " .. tostring(info), 3)
+            local msg = (type(info) == "table" and info.message) or tostring(info)
+            Library:Notify("Auth", "Clé refusée: " .. tostring(msg), 3)
         end
     else
         -- mode hors-ligne: accepte simplement la saisie non-vide
         if enteredKey and enteredKey ~= "" then
             isAuthenticated = true
+            Library:Notify("Auth", "Clé locale acceptée", 3)
             pcall(function() if authWindow and authWindow.Close then authWindow:Close() end end)
         else
             Library:Notify("Auth", "Entrer une clé valide", 3)
@@ -134,10 +137,22 @@ authTab:CreateButton({ Name = "Valider la clé", Callback = function()
     end
 end })
 
--- Attente si nécessaire
-while not isAuthenticated do
-    task.wait(0.5)
-end
+-- ATTENDEZ AVEC TIMEOUT (pas de boucle bloquante)
+local authTimeout = 0
+local maxAuthWait = 600 -- 60 secondes max
+
+task.spawn(function()
+    while not isAuthenticated and authTimeout < maxAuthWait do
+        authTimeout = authTimeout + 1
+        task.wait(0.1)
+    end
+    
+    if not isAuthenticated then
+        Library:Notify("Auth", "Timeout: Authentification non complétée", 5)
+    end
+end)
+
+-- Le reste du code continue SANS se bloquer
 
 --// INITIALISATION //--
 local authWindow = Library:CreateWindow({ Name = "OYNX HUB - Auth" })
