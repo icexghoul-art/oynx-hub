@@ -1,33 +1,144 @@
 return function(CombatTab, player, Camera, Mouse, RunService, UserInputService, VirtualInputManager, ReplicatedStorage)
-    -- TriggerBot Variables
-    local TriggerBotEnabled = false
-    local TriggerBotDistance = 150
-    local TriggerBotKey = "MouseButton1"
-    local TriggerBotDelay = 0.1
-    local LastTriggerTime = 0
-    
-    -- Aimlock Variables
-    local aimlockEnabled = false
-    local toggleEnabled = false
-    local smoothness = 0.5
-    
-    -- Mouselock Variables
-    local mouselockEnabled = false
-    local mouselockToggleEnabled = false
-    local mouselockSmoothness = 0.5
-    local mouselockRadius = 50
-    local mouselockTargetPart = "Head"
-    local showCircle = false
-    
-    -- Other Variables
-    local CurrentHitboxValue = 10
-    local clickReachEnabled = false
-    local clickReachRange = 100
-    local HitAndRunEnabled = false
-    local HitAndRunTargetPos = nil
-    local FastAttackEnabled = false
-    local FastAttackIntensity = 1
-    local FastAttackRange = 100
+local Library = loadstring(game:HttpGet("https://pastebin.com/raw/YHaPCpCr"))()
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local Mouse = player:GetMouse()
+local Camera = workspace.CurrentCamera
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local Debris = game:GetService("Debris")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local HttpService = game:GetService("HttpService")
+
+-- Variables Fast Attack (Boosted)
+local Net = ReplicatedStorage:WaitForChild("Modules"):WaitForChild("Net")
+local RegisterHit = Net:WaitForChild("RE/RegisterHit")
+local RegisterAttack = Net:WaitForChild("RE/RegisterAttack")
+local Modules = ReplicatedStorage:FindFirstChild("Modules")
+local Net = Modules and Modules:FindFirstChild("Net")
+local RegisterHit = Net and Net:FindFirstChild("RE/RegisterHit")
+local RegisterAttack = Net and Net:FindFirstChild("RE/RegisterAttack")
+
+-- Bypass Private Server Owner
+task.spawn(function()
+    pcall(function()
+        game:GetService("ReplicatedStorage").PrivateServerOwnerId.Value = player.UserId
+    end)
+end)
+
+-- Variables globales pour whitelist
+local whitelist = {}
+local playerDropdown = nil
+local whitelistDropdown = nil
+
+-- Variables pour les jumps
+local currentJumps = 0
+local maxJumps = 10
+local multiJumpEnabled = false
+local humanoid = nil
+
+-- Variables pour la taille
+local sizeMultiplierEnabled = false
+local originalSizes = {}
+local sizeMultiplier = 10
+local originalMaxZoomDistance = nil
+
+-- Variables pour la taille d'arme
+local weaponSizeEnabled = false
+local weaponSizeMultiplier = 5
+local originalWeaponSizes = {}
+local weaponSizeConnection = nil
+
+-- Variables SpeedHack
+local speedEnabled = false
+local speedValue = 16
+local speedConnection = nil
+local clickConnection = nil
+
+-- Variables Fly
+local flyEnabled = false
+local flySpeed = 50
+local flyConnection = nil
+
+-- Variables Aimlock
+local aimlockEnabled = false
+local aimlockConnection = nil
+local toggleEnabled = false
+local smoothness = 0.2
+local isLocked = false
+
+-- Variables Mouselock
+local mouselockEnabled = false
+local mouselockConnection = nil
+local mouselockToggleEnabled = false
+local mouselockSmoothness = 0.2
+local mouselockTargetPart = "UpperTorso"
+local mouselockRadius = 150
+local showCircle = false
+local circleDrawing = nil
+
+-- Variables Auto Escape
+local autoEscapeEnabled = false
+local healthThreshold = 40
+local tpHeightIncrement = 500
+local tpInterval = 0.1
+local escapeDuration = 15
+local isEscaping = false
+local lastHealth = 100
+local lastHealthCheckTime = tick()
+local rapidDamageThreshold = 10
+
+-- Variables Teleport
+local isTpEnabled = false
+local tpInputConnection = nil
+
+-- Variables Desync
+local desyncEnabled = false
+local desyncConnection = nil
+local frozenCFrame = nil
+
+-- Variables NPC Blocker
+local NPCBlockerEnabled = false
+local scriptBackup = {}
+
+-- Variables Anti Lava
+local AntiLavaEnabled = false
+local processed = {}
+
+-- Variables Anti Water
+local AntiWaterEnabled = false
+
+-- Variables No Clip
+local NoClipEnabled = false
+
+-- Variables Invisible
+local InvisibleEnabled = false
+local savedTransparency = {}
+
+-- Variables No Jump
+local NoJumpEnabled = false
+
+-- Variables Config
+local SelectedConfigName = ""
+
+-- Variables Fast Attack Logic
+local FastAttackEnabled = false
+local FastAttackConnection = nil
+local FastAttackRange = 50000
+local FastAttackIntensity = 10
+
+-- Variables Dash Length
+local DashEnabled = false
+local DashConnection = nil
+local DashLengthValue = 5
+
+-- Variables Raid
+local AutoRaidEnabled = false
+local AutoBuyChip = false
+local AutoStartRaid = false
+local SelectedRaid = "Flame"
+local RaidList = {"Flame", "Ice", "Quake", "Light", "Dark", "Spider", "Rumble", "Magma", "Buddha", "Sand", "Phoenix", "Dough"}
 
 local function GetTargetForTrigger()
     local target = Mouse.Target
