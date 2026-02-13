@@ -15,14 +15,18 @@ local function CreateKeybindToggle(displayName, toggleKey)
         local toggle = _G.OYNX_Toggles[toggleKey]
         
         if toggle then
-            -- Récupérer la valeur actuelle
-            local currentValue = toggle.CurrentValue or false
+            -- Au lieu de lire CurrentValue qui peut être désynchronisé,
+            -- on force juste l'inversion via le callback
+            local currentValue = toggle.CurrentValue
+            if currentValue == nil then
+                currentValue = toggle.Value or false
+            end
+            
             local newValue = not currentValue
             
-            -- Mettre à jour la valeur du toggle
-            toggle.CurrentValue = newValue
+            print("[Keybind Debug] " .. toggleKey .. " - CurrentValue avant: " .. tostring(currentValue))
             
-            -- Appeler le callback original du toggle pour exécuter la logique
+            -- Appeler d'ABORD le callback qui va gérer la logique
             if toggle.Callback and type(toggle.Callback) == "function" then
                 local success, err = pcall(function()
                     toggle.Callback(newValue)
@@ -30,8 +34,17 @@ local function CreateKeybindToggle(displayName, toggleKey)
                 
                 if not success then
                     warn("[Keybind] Erreur callback " .. toggleKey .. ": " .. tostring(err))
+                    return
                 end
             end
+            
+            -- PUIS mettre à jour les valeurs du toggle
+            toggle.CurrentValue = newValue
+            if toggle.Value ~= nil then
+                toggle.Value = newValue
+            end
+            
+            print("[Keybind Debug] " .. toggleKey .. " - CurrentValue après: " .. tostring(toggle.CurrentValue))
             
             -- Mettre à jour l'UI du toggle si possible
             if toggle.Set and type(toggle.Set) == "function" then
