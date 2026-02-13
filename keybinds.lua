@@ -6,6 +6,28 @@ return function(KeybindTab, player, UserInputService, Library, Window)
 -- ============================================
 local Keybinds = {}
 
+-- Système de callbacks différés (appellera les fonctions quand elles existent)
+local function SafeToggle(varName, funcName, displayName)
+    return function()
+        -- Essayer d'accéder à la variable globale
+        local currentValue = _G[varName]
+        if currentValue ~= nil then
+            _G[varName] = not currentValue
+            
+            -- Essayer d'appeler la fonction si elle existe
+            if _G[funcName] and type(_G[funcName]) == "function" then
+                pcall(function()
+                    _G[funcName](_G[varName])
+                end)
+            end
+            
+            Library:Notify(displayName, _G[varName] and "Activé" or "Désactivé", 2)
+        else
+            Library:Notify("Erreur", displayName .. " non disponible", 2)
+        end
+    end
+end
+
 -- ============================================
 -- LABELS ET SECTIONS
 -- ============================================
@@ -25,11 +47,7 @@ Keybinds.Speed = KeybindTab:CreateKeybind({
     Column = "Left",
     CurrentKey = Enum.KeyCode.V,
     Flag = true,
-    Callback = function()
-        speedEnabled = not speedEnabled
-        ToggleSpeed(speedEnabled)
-        Library:Notify("Speed", speedEnabled and "Activé" or "Désactivé", 2)
-    end
+    Callback = SafeToggle("speedEnabled", "ToggleSpeed", "Speed")
 })
 
 Keybinds.Fly = KeybindTab:CreateKeybind({
@@ -37,11 +55,7 @@ Keybinds.Fly = KeybindTab:CreateKeybind({
     Column = "Left",
     CurrentKey = Enum.KeyCode.X,
     Flag = true,
-    Callback = function()
-        flyEnabled = not flyEnabled
-        ToggleFly(flyEnabled)
-        Library:Notify("Fly", flyEnabled and "Activé" or "Désactivé", 2)
-    end
+    Callback = SafeToggle("flyEnabled", "ToggleFly", "Fly")
 })
 
 Keybinds.NoClip = KeybindTab:CreateKeybind({
@@ -49,10 +63,7 @@ Keybinds.NoClip = KeybindTab:CreateKeybind({
     Column = "Left",
     CurrentKey = Enum.KeyCode.B,
     Flag = true,
-    Callback = function()
-        NoClipEnabled = not NoClipEnabled
-        Library:Notify("No Clip", NoClipEnabled and "Activé" or "Désactivé", 2)
-    end
+    Callback = SafeToggle("noclipEnabled", "ToggleNoClip", "No Clip")
 })
 
 Keybinds.Teleport = KeybindTab:CreateKeybind({
@@ -60,10 +71,7 @@ Keybinds.Teleport = KeybindTab:CreateKeybind({
     Column = "Left",
     CurrentKey = Enum.KeyCode.T,
     Flag = true,
-    Callback = function()
-        isTpEnabled = not isTpEnabled
-        Library:Notify("TP to Mouse", isTpEnabled and "Activé" or "Désactivé", 2)
-    end
+    Callback = SafeToggle("isTpEnabled", nil, "TP to Mouse")
 })
 
 -- ===== COMBAT KEYBINDS ===== --
@@ -74,11 +82,7 @@ Keybinds.FastAttack = KeybindTab:CreateKeybind({
     Column = "Right",
     CurrentKey = Enum.KeyCode.C,
     Flag = true,
-    Callback = function()
-        FastAttackEnabled = not FastAttackEnabled
-        toggleFastAttack(FastAttackEnabled)
-        Library:Notify("Fast Attack", FastAttackEnabled and "Activé" or "Désactivé", 2)
-    end
+    Callback = SafeToggle("FastAttackEnabled", "toggleFastAttack", "Fast Attack")
 })
 
 Keybinds.Aimlock = KeybindTab:CreateKeybind({
@@ -86,10 +90,7 @@ Keybinds.Aimlock = KeybindTab:CreateKeybind({
     Column = "Right",
     CurrentKey = Enum.KeyCode.Q,
     Flag = true,
-    Callback = function()
-        aimlockEnabled = not aimlockEnabled
-        Library:Notify("Aimlock", aimlockEnabled and "Activé" or "Désactivé", 2)
-    end
+    Callback = SafeToggle("aimlockEnabled", nil, "Aimlock")
 })
 
 Keybinds.Mouselock = KeybindTab:CreateKeybind({
@@ -97,10 +98,7 @@ Keybinds.Mouselock = KeybindTab:CreateKeybind({
     Column = "Right",
     CurrentKey = Enum.KeyCode.E,
     Flag = true,
-    Callback = function()
-        mouselockEnabled = not mouselockEnabled
-        Library:Notify("Mouselock", mouselockEnabled and "Activé" or "Désactivé", 2)
-    end
+    Callback = SafeToggle("mouselockEnabled", nil, "Mouselock")
 })
 
 -- ===== MISC KEYBINDS ===== --
@@ -111,10 +109,7 @@ Keybinds.AutoEscape = KeybindTab:CreateKeybind({
     Column = "Left",
     CurrentKey = Enum.KeyCode.F,
     Flag = true,
-    Callback = function()
-        autoEscapeEnabled = not autoEscapeEnabled
-        Library:Notify("Auto Escape", autoEscapeEnabled and "Activé" or "Désactivé", 2)
-    end
+    Callback = SafeToggle("autoEscapeEnabled", nil, "Auto Escape")
 })
 
 Keybinds.Invisible = KeybindTab:CreateKeybind({
@@ -122,11 +117,7 @@ Keybinds.Invisible = KeybindTab:CreateKeybind({
     Column = "Left",
     CurrentKey = Enum.KeyCode.G,
     Flag = true,
-    Callback = function()
-        InvisibleEnabled = not InvisibleEnabled
-        SetInvisible(InvisibleEnabled)
-        Library:Notify("Invisible", InvisibleEnabled and "Activé" or "Désactivé", 2)
-    end
+    Callback = SafeToggle("InvisibleEnabled", "SetInvisible", "Invisible")
 })
 
 Keybinds.NPCBlocker = KeybindTab:CreateKeybind({
@@ -134,11 +125,7 @@ Keybinds.NPCBlocker = KeybindTab:CreateKeybind({
     Column = "Right",
     CurrentKey = Enum.KeyCode.N,
     Flag = true,
-    Callback = function()
-        NPCBlockerEnabled = not NPCBlockerEnabled
-        SetNPCScriptsState(NPCBlockerEnabled)
-        Library:Notify("NPC Blocker", NPCBlockerEnabled and "Activé" or "Désactivé", 2)
-    end
+    Callback = SafeToggle("npcBlockerEnabled", "SetNPCScriptsState", "NPC Blocker")
 })
 
 -- ============================================
