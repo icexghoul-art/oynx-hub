@@ -6,6 +6,53 @@ return function(KeybindTab, player, UserInputService, Library, Window)
 -- ============================================
 local Keybinds = {}
 
+-- Table pour stocker les références aux toggles UI
+_G.OYNX_Toggles = _G.OYNX_Toggles or {}
+
+-- Système de callbacks qui utilise les toggles UI directement
+local function CreateKeybindToggle(displayName, toggleKey)
+    return function()
+        local toggle = _G.OYNX_Toggles[toggleKey]
+        
+        if toggle then
+            -- Récupérer la valeur actuelle
+            local currentValue = toggle.CurrentValue or false
+            local newValue = not currentValue
+            
+            -- Mettre à jour la valeur du toggle
+            toggle.CurrentValue = newValue
+            
+            -- Appeler le callback original du toggle pour exécuter la logique
+            if toggle.Callback and type(toggle.Callback) == "function" then
+                local success, err = pcall(function()
+                    toggle.Callback(newValue)
+                end)
+                
+                if not success then
+                    warn("[Keybind] Erreur callback " .. toggleKey .. ": " .. tostring(err))
+                end
+            end
+            
+            -- Mettre à jour l'UI du toggle si possible
+            if toggle.Set and type(toggle.Set) == "function" then
+                pcall(function()
+                    toggle:Set(newValue)
+                end)
+            end
+            
+            -- Notification
+            Library:Notify(displayName, newValue and "Activé" or "Désactivé", 2)
+        else
+            Library:Notify("Erreur", displayName .. " non disponible", 2)
+            print("[Keybind Debug] Toggle non trouvé: " .. toggleKey)
+            print("[Keybind Debug] Toggles disponibles:")
+            for k, v in pairs(_G.OYNX_Toggles) do
+                print("  - " .. k)
+            end
+        end
+    end
+end
+
 -- ============================================
 -- LABELS ET SECTIONS
 -- ============================================
@@ -25,13 +72,7 @@ Keybinds.Speed = KeybindTab:CreateKeybind({
     Column = "Left",
     CurrentKey = Enum.KeyCode.V,
     Flag = true,
-    Callback = function()
-        pcall(function()
-            _G.speedEnabled = not _G.speedEnabled
-            if _G.ToggleSpeed then _G.ToggleSpeed(_G.speedEnabled) end
-            Library:Notify("Speed", _G.speedEnabled and "Activé" or "Désactivé", 2)
-        end)
-    end
+    Callback = CreateKeybindToggle("Speed", "SpeedToggle")
 })
 
 Keybinds.Fly = KeybindTab:CreateKeybind({
@@ -39,13 +80,7 @@ Keybinds.Fly = KeybindTab:CreateKeybind({
     Column = "Left",
     CurrentKey = Enum.KeyCode.X,
     Flag = true,
-    Callback = function()
-        pcall(function()
-            _G.flyEnabled = not _G.flyEnabled
-            if _G.ToggleFly then _G.ToggleFly(_G.flyEnabled) end
-            Library:Notify("Fly", _G.flyEnabled and "Activé" or "Désactivé", 2)
-        end)
-    end
+    Callback = CreateKeybindToggle("Fly", "FlyToggle")
 })
 
 Keybinds.NoClip = KeybindTab:CreateKeybind({
@@ -53,12 +88,7 @@ Keybinds.NoClip = KeybindTab:CreateKeybind({
     Column = "Left",
     CurrentKey = Enum.KeyCode.B,
     Flag = true,
-    Callback = function()
-        pcall(function()
-            _G.NoClipEnabled = not _G.NoClipEnabled
-            Library:Notify("No Clip", _G.NoClipEnabled and "Activé" or "Désactivé", 2)
-        end)
-    end
+    Callback = CreateKeybindToggle("No Clip", "NoClipToggle")
 })
 
 Keybinds.Teleport = KeybindTab:CreateKeybind({
@@ -66,12 +96,7 @@ Keybinds.Teleport = KeybindTab:CreateKeybind({
     Column = "Left",
     CurrentKey = Enum.KeyCode.T,
     Flag = true,
-    Callback = function()
-        pcall(function()
-            _G.isTpEnabled = not _G.isTpEnabled
-            Library:Notify("TP to Mouse", _G.isTpEnabled and "Activé" or "Désactivé", 2)
-        end)
-    end
+    Callback = CreateKeybindToggle("TP to Mouse", "TpMouseToggle")
 })
 
 -- ===== COMBAT KEYBINDS ===== --
@@ -82,13 +107,7 @@ Keybinds.FastAttack = KeybindTab:CreateKeybind({
     Column = "Right",
     CurrentKey = Enum.KeyCode.C,
     Flag = true,
-    Callback = function()
-        pcall(function()
-            _G.FastAttackEnabled = not _G.FastAttackEnabled
-            if _G.toggleFastAttack then _G.toggleFastAttack(_G.FastAttackEnabled) end
-            Library:Notify("Fast Attack", _G.FastAttackEnabled and "Activé" or "Désactivé", 2)
-        end)
-    end
+    Callback = CreateKeybindToggle("Fast Attack", "FastAttackToggle")
 })
 
 Keybinds.Aimlock = KeybindTab:CreateKeybind({
@@ -96,12 +115,7 @@ Keybinds.Aimlock = KeybindTab:CreateKeybind({
     Column = "Right",
     CurrentKey = Enum.KeyCode.Q,
     Flag = true,
-    Callback = function()
-        pcall(function()
-            _G.aimlockEnabled = not _G.aimlockEnabled
-            Library:Notify("Aimlock", _G.aimlockEnabled and "Activé" or "Désactivé", 2)
-        end)
-    end
+    Callback = CreateKeybindToggle("Aimlock", "AimlockToggle")
 })
 
 Keybinds.Mouselock = KeybindTab:CreateKeybind({
@@ -109,12 +123,7 @@ Keybinds.Mouselock = KeybindTab:CreateKeybind({
     Column = "Right",
     CurrentKey = Enum.KeyCode.E,
     Flag = true,
-    Callback = function()
-        pcall(function()
-            _G.mouselockEnabled = not _G.mouselockEnabled
-            Library:Notify("Mouselock", _G.mouselockEnabled and "Activé" or "Désactivé", 2)
-        end)
-    end
+    Callback = CreateKeybindToggle("Mouselock", "MouselockToggle")
 })
 
 -- ===== MISC KEYBINDS ===== --
@@ -125,12 +134,7 @@ Keybinds.AutoEscape = KeybindTab:CreateKeybind({
     Column = "Left",
     CurrentKey = Enum.KeyCode.F,
     Flag = true,
-    Callback = function()
-        pcall(function()
-            _G.autoEscapeEnabled = not _G.autoEscapeEnabled
-            Library:Notify("Auto Escape", _G.autoEscapeEnabled and "Activé" or "Désactivé", 2)
-        end)
-    end
+    Callback = CreateKeybindToggle("Auto Escape", "AutoEscapeToggle")
 })
 
 Keybinds.Invisible = KeybindTab:CreateKeybind({
@@ -138,13 +142,7 @@ Keybinds.Invisible = KeybindTab:CreateKeybind({
     Column = "Left",
     CurrentKey = Enum.KeyCode.G,
     Flag = true,
-    Callback = function()
-        pcall(function()
-            _G.InvisibleEnabled = not _G.InvisibleEnabled
-            if _G.SetInvisible then _G.SetInvisible(_G.InvisibleEnabled) end
-            Library:Notify("Invisible", _G.InvisibleEnabled and "Activé" or "Désactivé", 2)
-        end)
-    end
+    Callback = CreateKeybindToggle("Invisible", "InvisibleToggle")
 })
 
 Keybinds.NPCBlocker = KeybindTab:CreateKeybind({
@@ -152,13 +150,7 @@ Keybinds.NPCBlocker = KeybindTab:CreateKeybind({
     Column = "Right",
     CurrentKey = Enum.KeyCode.N,
     Flag = true,
-    Callback = function()
-        pcall(function()
-            _G.NPCBlockerEnabled = not _G.NPCBlockerEnabled
-            if _G.SetNPCScriptsState then _G.SetNPCScriptsState(_G.NPCBlockerEnabled) end
-            Library:Notify("NPC Blocker", _G.NPCBlockerEnabled and "Activé" or "Désactivé", 2)
-        end)
-    end
+    Callback = CreateKeybindToggle("NPC Blocker", "NPCBlockerToggle")
 })
 
 -- ============================================
@@ -186,7 +178,6 @@ KeybindTab:CreateButton({
     Name = "🔄 Reset tous les Keybinds",
     Column = "Left",
     Callback = function()
-        -- Reset toutes les touches à Unknown
         for name, keybind in pairs(Keybinds) do
             if keybind and keybind.SetKey then
                 keybind.SetKey(Enum.KeyCode.Unknown)
@@ -212,20 +203,27 @@ KeybindTab:CreateButton({
     end
 })
 
+KeybindTab:CreateButton({
+    Name = "🔍 Debug - Liste des Toggles",
+    Column = "Right",
+    Callback = function()
+        print("=== TOGGLES ENREGISTRÉS ===")
+        for key, toggle in pairs(_G.OYNX_Toggles) do
+            local value = toggle.CurrentValue or false
+            print(key .. ": " .. tostring(value))
+        end
+        print("===========================")
+    end
+})
+
 return {
     Keybinds = Keybinds,
-    
-    -- Fonctions utilitaires
-    GetKeybind = function(name)
-        return Keybinds[name]
-    end,
-    
+    GetKeybind = function(name) return Keybinds[name] end,
     SetKeybind = function(name, keyCode)
         if Keybinds[name] and Keybinds[name].SetKey then
             Keybinds[name].SetKey(keyCode)
         end
     end,
-    
     GetAllKeybinds = function()
         local result = {}
         for name, keybind in pairs(Keybinds) do
@@ -235,7 +233,6 @@ return {
         end
         return result
     end,
-    
     ResetAllKeybinds = function()
         for name, keybind in pairs(Keybinds) do
             if keybind and keybind.SetKey then
