@@ -6,28 +6,6 @@ return function(KeybindTab, player, UserInputService, Library, Window)
 -- ============================================
 local Keybinds = {}
 
--- Système de callbacks différés (appellera les fonctions quand elles existent)
-local function SafeToggle(varName, funcName, displayName)
-    return function()
-        -- Essayer d'accéder à la variable globale
-        local currentValue = _G[varName]
-        if currentValue ~= nil then
-            _G[varName] = not currentValue
-            
-            -- Essayer d'appeler la fonction si elle existe
-            if _G[funcName] and type(_G[funcName]) == "function" then
-                pcall(function()
-                    _G[funcName](_G[varName])
-                end)
-            end
-            
-            Library:Notify(displayName, _G[varName] and "Activé" or "Désactivé", 2)
-        else
-            Library:Notify("Erreur", displayName .. " non disponible", 2)
-        end
-    end
-end
-
 -- ============================================
 -- LABELS ET SECTIONS
 -- ============================================
@@ -47,7 +25,13 @@ Keybinds.Speed = KeybindTab:CreateKeybind({
     Column = "Left",
     CurrentKey = Enum.KeyCode.V,
     Flag = true,
-    Callback = SafeToggle("speedEnabled", "ToggleSpeed", "Speed")
+    Callback = function()
+        pcall(function()
+            _G.speedEnabled = not _G.speedEnabled
+            if _G.ToggleSpeed then _G.ToggleSpeed(_G.speedEnabled) end
+            Library:Notify("Speed", _G.speedEnabled and "Activé" or "Désactivé", 2)
+        end)
+    end
 })
 
 Keybinds.Fly = KeybindTab:CreateKeybind({
@@ -55,7 +39,13 @@ Keybinds.Fly = KeybindTab:CreateKeybind({
     Column = "Left",
     CurrentKey = Enum.KeyCode.X,
     Flag = true,
-    Callback = SafeToggle("flyEnabled", "ToggleFly", "Fly")
+    Callback = function()
+        pcall(function()
+            _G.flyEnabled = not _G.flyEnabled
+            if _G.ToggleFly then _G.ToggleFly(_G.flyEnabled) end
+            Library:Notify("Fly", _G.flyEnabled and "Activé" or "Désactivé", 2)
+        end)
+    end
 })
 
 Keybinds.NoClip = KeybindTab:CreateKeybind({
@@ -63,7 +53,12 @@ Keybinds.NoClip = KeybindTab:CreateKeybind({
     Column = "Left",
     CurrentKey = Enum.KeyCode.B,
     Flag = true,
-    Callback = SafeToggle("noclipEnabled", "ToggleNoClip", "No Clip")
+    Callback = function()
+        pcall(function()
+            _G.NoClipEnabled = not _G.NoClipEnabled
+            Library:Notify("No Clip", _G.NoClipEnabled and "Activé" or "Désactivé", 2)
+        end)
+    end
 })
 
 Keybinds.Teleport = KeybindTab:CreateKeybind({
@@ -71,7 +66,12 @@ Keybinds.Teleport = KeybindTab:CreateKeybind({
     Column = "Left",
     CurrentKey = Enum.KeyCode.T,
     Flag = true,
-    Callback = SafeToggle("isTpEnabled", nil, "TP to Mouse")
+    Callback = function()
+        pcall(function()
+            _G.isTpEnabled = not _G.isTpEnabled
+            Library:Notify("TP to Mouse", _G.isTpEnabled and "Activé" or "Désactivé", 2)
+        end)
+    end
 })
 
 -- ===== COMBAT KEYBINDS ===== --
@@ -82,7 +82,13 @@ Keybinds.FastAttack = KeybindTab:CreateKeybind({
     Column = "Right",
     CurrentKey = Enum.KeyCode.C,
     Flag = true,
-    Callback = SafeToggle("FastAttackEnabled", "toggleFastAttack", "Fast Attack")
+    Callback = function()
+        pcall(function()
+            _G.FastAttackEnabled = not _G.FastAttackEnabled
+            if _G.toggleFastAttack then _G.toggleFastAttack(_G.FastAttackEnabled) end
+            Library:Notify("Fast Attack", _G.FastAttackEnabled and "Activé" or "Désactivé", 2)
+        end)
+    end
 })
 
 Keybinds.Aimlock = KeybindTab:CreateKeybind({
@@ -90,7 +96,12 @@ Keybinds.Aimlock = KeybindTab:CreateKeybind({
     Column = "Right",
     CurrentKey = Enum.KeyCode.Q,
     Flag = true,
-    Callback = SafeToggle("aimlockEnabled", nil, "Aimlock")
+    Callback = function()
+        pcall(function()
+            _G.aimlockEnabled = not _G.aimlockEnabled
+            Library:Notify("Aimlock", _G.aimlockEnabled and "Activé" or "Désactivé", 2)
+        end)
+    end
 })
 
 Keybinds.Mouselock = KeybindTab:CreateKeybind({
@@ -98,7 +109,12 @@ Keybinds.Mouselock = KeybindTab:CreateKeybind({
     Column = "Right",
     CurrentKey = Enum.KeyCode.E,
     Flag = true,
-    Callback = SafeToggle("mouselockEnabled", nil, "Mouselock")
+    Callback = function()
+        pcall(function()
+            _G.mouselockEnabled = not _G.mouselockEnabled
+            Library:Notify("Mouselock", _G.mouselockEnabled and "Activé" or "Désactivé", 2)
+        end)
+    end
 })
 
 -- ===== MISC KEYBINDS ===== --
@@ -109,7 +125,12 @@ Keybinds.AutoEscape = KeybindTab:CreateKeybind({
     Column = "Left",
     CurrentKey = Enum.KeyCode.F,
     Flag = true,
-    Callback = SafeToggle("autoEscapeEnabled", nil, "Auto Escape")
+    Callback = function()
+        pcall(function()
+            _G.autoEscapeEnabled = not _G.autoEscapeEnabled
+            Library:Notify("Auto Escape", _G.autoEscapeEnabled and "Activé" or "Désactivé", 2)
+        end)
+    end
 })
 
 Keybinds.Invisible = KeybindTab:CreateKeybind({
@@ -117,7 +138,13 @@ Keybinds.Invisible = KeybindTab:CreateKeybind({
     Column = "Left",
     CurrentKey = Enum.KeyCode.G,
     Flag = true,
-    Callback = SafeToggle("InvisibleEnabled", "SetInvisible", "Invisible")
+    Callback = function()
+        pcall(function()
+            _G.InvisibleEnabled = not _G.InvisibleEnabled
+            if _G.SetInvisible then _G.SetInvisible(_G.InvisibleEnabled) end
+            Library:Notify("Invisible", _G.InvisibleEnabled and "Activé" or "Désactivé", 2)
+        end)
+    end
 })
 
 Keybinds.NPCBlocker = KeybindTab:CreateKeybind({
@@ -125,7 +152,13 @@ Keybinds.NPCBlocker = KeybindTab:CreateKeybind({
     Column = "Right",
     CurrentKey = Enum.KeyCode.N,
     Flag = true,
-    Callback = SafeToggle("npcBlockerEnabled", "SetNPCScriptsState", "NPC Blocker")
+    Callback = function()
+        pcall(function()
+            _G.NPCBlockerEnabled = not _G.NPCBlockerEnabled
+            if _G.SetNPCScriptsState then _G.SetNPCScriptsState(_G.NPCBlockerEnabled) end
+            Library:Notify("NPC Blocker", _G.NPCBlockerEnabled and "Activé" or "Désactivé", 2)
+        end)
+    end
 })
 
 -- ============================================
