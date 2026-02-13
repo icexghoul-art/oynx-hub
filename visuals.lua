@@ -81,7 +81,7 @@ end
 
 RunService.RenderStepped:Connect(UpdateESP)
 
-VisualsTab:CreateSection("ESP Settings")
+VisualsTab:CreateSection({Name = "ESP Settings", Column = "Left"})
 VisualsTab:CreateToggle({
     Name = "Enable ESP (Master Switch)",
     Column = "Left",
@@ -105,7 +105,7 @@ VisualsTab:CreateToggle({
 
 -- Custom Cursor
 local CustomCursorId = ""
-VisualsTab:CreateSection("Custom Cursor")
+VisualsTab:CreateSection({Name = "Custom Cursor", Column = "Right"})
 VisualsTab:CreateInput({
     Name = "Custom Cursor (ID or File)",
     PlaceholderText = "ID or cursor.png",
